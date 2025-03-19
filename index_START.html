@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheet Data</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 14px;
+            color: rgb(110, 87, 72);
+            display: flex;
+            margin: 0;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Fixed menu bar */
+        #menu-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 60px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    text-align: left; /* Centers text */
+    width: 80vw; /* Adjust width as needed */
+    padding: 20px;
+    margin-top: 20px;
+    Margin-left: 60px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2em;
+}
+
+p {
+    max-width: 800px; /* Ensures text doesn't stretch too wide */
+    margin-bottom: 20px;
+}
+
+        .menu-button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            writing-mode: vertical-rl;
+            font-family: 'Roboto Mono', monospace;
+            color: rgb(110, 87, 72);
+            border: 1px solid rgb(110, 87, 72);
+            border-bottom: none;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .menu-button:last-child {
+            border-bottom: 1px solid rgb(110, 87, 72);
+        }
+
+        .menu-button:hover {
+            background-color: rgb(241, 241, 147);
+            color: blue;
+        }
+
+        #content {
+            margin-left: 70px;
+            flex: 1;
+            padding: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: auto;
+            table-layout: auto;
+            cursor: pointer;
+        }
+
+        img {
+            max-width: 10vw;
+            max-height: 10vw;
+            transition: all 0.5s ease;
+            z-index: 100;
+        }
+
+        td.A img {
+            max-width: 10vw;
+            max-height: 10vw;
+            object-fit: contain;
+        }
+
+        td.A:hover img {
+            max-width: 40vw;
+            max-height: 40vw;
+        }
+
+        th, td {
+            border: 1px solid rgb(110, 87, 72);
+            padding: 5px;
+            text-align: left;
+            transition: width 1.5s ease, background-color 0.3s ease;
+        }
+
+        tr:hover {
+            color: white;
+            background-color: rgb(110, 87, 72);
+        }
+
+        td:hover {
+            background-color: rgb(169, 197, 243);
+            color: blue;
+        }
+
+        .hovered-column {
+            background-color: rgb(241, 241, 147);
+        }
+
+        th {
+            background-color: rgb(169, 197, 243);
+            cursor: pointer;
+        }
+
+        th:hover {
+            background-color: rgb(180, 180, 180);
+            color: rgb(110, 87, 72);
+        }
+
+        /* Styling for the full-screen overlay */
+        #new-average {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            color: black;
+            mix-blend-mode: difference;
+            font-size: 10em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none; /* Disable interaction with the overlay */
+            z-index: 10;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="main-content">
+        <h1>Aesthetic Value</h1>
+        <p>This website explores the economic value of aesthetics.
+
+        How do we value aesthetics, and why do some aesthetic choices command more money than others? On this website, you can browse through a curated selection, compare different aesthetics, and reflect on why certain choices might hold more value.
+
+        You will also be presented with the average value of a filtered aesthetic in Swedish kronor (SEK).
+
+       <br> <strong>Disclaimer:</strong> Please note that this average is derived from my relative small poll of 195 images and is not an accurate representation of all currencies used worldwide.</p>
+
+        <div id="output"></div> <!-- Table will be inserted here -->
+    </div>
+    <div id="menu-bar">
+        <div id="resetButton" class="menu-button">Reset Filter</div>
+        <div id="current-filter" class="menu-button">Current Filter: None</div>
+        <div id="average-value" class="menu-button">Average: 0</div>
+    </div>
+
+    <div id="content">
+        <div id="output"></div>
+    </div>
+
+    <!-- Full-Screen Overlay for Average -->
+    <div id="new-average">Average: 0 SEK</div>
+
+    <script>
+      let originalData = [];
+let headerRow = [];
+let sortOrder = {};
+let currentFilter = "None";
+let filteredData = [];
+
+document.addEventListener("DOMContentLoaded", function () {
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSM5ADC_1JGALFMzURqXGjHcrbHNMt4Q3bCAGy5KNOgI4LVG5INTOWyHk2um0JO01_4PXoku3PS8ywA/pub?output=csv";
+
+    Papa.parse(csvUrl, {
+        download: true,
+        header: false,
+        complete: function (results) {
+            originalData = results.data;
+            headerRow = originalData[0];
+            renderTable(originalData);
+        }
+    });
+});
+
+function renderTable(data) {
+    const table = document.createElement("table");
+
+    // Create header row
+    const staticHeaderRow = document.createElement("tr");
+    headerRow.forEach((cell, index) => {
+        const th = document.createElement("th");
+        th.textContent = cell;
+        th.dataset.column = index;
+        th.addEventListener("click", () => sortColumn(index));
+        staticHeaderRow.appendChild(th);
+    });
+    table.appendChild(staticHeaderRow);
+
+    // Create table body
+    const tbody = document.createElement("tbody");
+    data.slice(1).forEach((row) => {
+        const tr = document.createElement("tr");
+        row.forEach((cell, colIndex) => {
+            const td = document.createElement("td");
+
+            if (isImageUrl(cell)) {
+                const img = document.createElement("img");
+                img.src = cell;
+                td.appendChild(img);
+                td.classList.add("A");
+            } else {
+                td.textContent = cell;
+            }
+
+            td.dataset.column = colIndex;
+            td.dataset.value = cell;
+            td.addEventListener("click", filterTable);
+            td.addEventListener("mouseenter", () => highlightColumn(colIndex));
+            td.addEventListener("mouseleave", () => removeHighlightColumn(colIndex));
+
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    const output = document.getElementById("output");
+    output.innerHTML = "";
+    output.appendChild(table);
+
+    calculateAverage(filteredData.length > 0 ? filteredData : originalData);
+}
+
+function isImageUrl(url) {
+    return /\.(jpeg|jpg|gif|png)$/i.test(url);
+}
+
+function highlightColumn(colIndex) {
+    document.querySelectorAll("table tr").forEach(row => {
+        if (row.children[colIndex]) {
+            row.children[colIndex].classList.add("hovered-column");
+        }
+    });
+}
+
+function removeHighlightColumn(colIndex) {
+    document.querySelectorAll("table tr").forEach(row => {
+        if (row.children[colIndex]) {
+            row.children[colIndex].classList.remove("hovered-column");
+        }
+    });
+}
+
+function sortColumn(columnIndex) {
+    let dataToSort = filteredData.length > 0 ? filteredData.slice(1) : originalData.slice(1);
+    let isAscending = sortOrder[columnIndex] !== "asc";
+
+    dataToSort.sort((a, b) => {
+        let valA = isNaN(a[columnIndex]) ? a[columnIndex] : parseFloat(a[columnIndex]);
+        let valB = isNaN(b[columnIndex]) ? b[columnIndex] : parseFloat(b[columnIndex]);
+
+        return isAscending ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+    });
+
+    sortOrder[columnIndex] = isAscending ? "asc" : "desc";
+    renderTable([headerRow, ...dataToSort]);
+}
+
+function filterTable(event) {
+    const columnIndex = event.target.dataset.column;
+    const filterValue = event.target.dataset.value;
+
+    if (!columnIndex || !filterValue.trim()) return; // Avoid empty filters
+
+    currentFilter = filterValue;
+    document.getElementById("current-filter").textContent = "Current Filter: " + filterValue;
+
+    filteredData = originalData.filter(row => row[columnIndex] === filterValue);
+    renderTable(filteredData);
+}
+
+function calculateAverage(data) {
+    let total = 0, count = 0;
+
+    data.slice(1).forEach(row => {
+        let conversionRate = parseFloat(row[10]) || 1; // Default to 1 if missing
+        let denomination = parseFloat(row[5]) || 0; // Default to 0
+
+        if (conversionRate > 0 && denomination > 0) {
+            total += denomination / conversionRate;
+            count++;
+        }
+    });
+
+    let average = count > 0 ? Math.ceil(total / count) : 0;
+    document.getElementById("average-value").textContent = `Average: ${average} SEK`;
+    document.getElementById("new-average").textContent = `Average: ${average} SEK`;
+    showNewAverage();
+}
+
+document.getElementById("resetButton").addEventListener("click", function () {
+    filteredData = [];
+    renderTable(originalData);
+    document.getElementById("current-filter").textContent = "Current Filter: None";
+});
+
+// Show the full-screen average overlay
+function showNewAverage() {
+    document.getElementById("new-average").style.display = "flex"; // Make overlay visible
+}
+
+// Hide the overlay when clicked (optional)
+document.getElementById("new-average").addEventListener("click", function () {
+    this.style.display = "none";
+});
+
+    </script>
+
+</body>
+</html>
