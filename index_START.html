@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Sheet Data</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100..700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         body {
@@ -26,26 +26,31 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            z-index: 1;
         }
         #main-content {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    text-align: left; /* Centers text */
-    width: 80vw; /* Adjust width as needed */
-    padding: 20px;
-    margin-top: 20px;
-    Margin-left: 60px;
+            display: flex;
+            flex-direction: column;
+            position:relative;
+            align-items: left;
+            text-align: left; /* Centers text */
+            width: 80vw; /* Adjust width as needed */
+            padding: 20px;
+            margin-top: 20px;
+            Margin-left: 60px;
+            z-index:2;
 }
 
 h1 {
     margin: 0;
     font-size: 2em;
+    z-index: 100;
 }
 
 p {
-    max-width: 800px; /* Ensures text doesn't stretch too wide */
+    max-width: 800px;
     margin-bottom: 20px;
+    z-index: 100;
 }
 
         .menu-button {
@@ -68,8 +73,8 @@ p {
         }
 
         .menu-button:hover {
-            background-color: rgb(241, 241, 147);
-            color: blue;
+            background-color: #fff59d;
+            color: (#1565c0);
         }
 
         #content {
@@ -83,6 +88,8 @@ p {
             width: auto;
             table-layout: auto;
             cursor: pointer;
+            mix-blend-mode: difference;
+            max-width: calc(100vw - 80px); /* 60px for menu + 20px right margin */
         }
 
         img {
@@ -90,6 +97,7 @@ p {
             max-height: 10vw;
             transition: all 0.5s ease;
             z-index: 100;
+            mix-blend-mode: none;
         }
 
         td.A img {
@@ -120,13 +128,58 @@ p {
             color: blue;
         }
 
+        /* Remove the old hovered-column class */
         .hovered-column {
-            background-color: rgb(241, 241, 147);
+            background-color: var(--default-hover);
+        }
+
+        /* Color Classes for Column Hover */
+        .color-blue .hovered-column {
+            background-color: var(--blue-hover);
+        }
+
+        .color-brown .hovered-column {
+            background-color: var(--brown-hover);
+        }
+
+        .color-green .hovered-column {
+            background-color: var(--green-hover);
+        }
+
+        .color-grey .hovered-column {
+            background-color: var(--grey-hover);
+        }
+
+        .color-orange .hovered-column {
+            background-color: var(--orange-hover);
+        }
+
+        .color-pink .hovered-column {
+            background-color: var(--pink-hover);
+        }
+
+        .color-purple .hovered-column {
+            background-color: var(--purple-hover);
+        }
+
+        .color-red .hovered-column {
+            background-color: var(--red-hover);
+        }
+
+        .color-turquoise .hovered-column {
+            background-color: var(--turquoise-hover);
+        }
+
+        .color-yellow .hovered-column {
+            background-color: var(--yellow-hover);
         }
 
         th {
             background-color: rgb(169, 197, 243);
             cursor: pointer;
+            position: relative;
+            min-width: 40px; /* Minimum width for header cells */
+            padding-right: 20px; /* Space for the arrow */
         }
 
         th:hover {
@@ -134,43 +187,244 @@ p {
             color: rgb(110, 87, 72);
         }
 
+        /* Sort arrow styles */
+        th::after {
+            content: '';
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            width: 10px; /* Fixed width for the arrow */
+            text-align: center;
+        }
+
+        th.asc::after {
+            content: '▲';
+            opacity: 1;
+        }
+
+        th.desc::after {
+            content: '▼';
+            opacity: 1;
+        }
+        #titel{
+            z-index:101;
+            position: relative;
+        }
         /* Styling for the full-screen overlay */
         #new-average {
             display: none;
             position: fixed;
-            top: 0;
+            top: -10vh;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            color: black;
-            mix-blend-mode: difference;
-            font-size: 10em;
+            color: rgba(110, 87, 72, 0.2);
+            mix-blend-mode: color-dodge;
+            font-size: 55vw;
+            font-variation-settings: 'wght' 100;
+            animation: fontWeight 4s infinite alternate ease-in-out;
             display: flex;
             justify-content: center;
-            align-items: center;
+            text-align: center;
             pointer-events: none; /* Disable interaction with the overlay */
-            z-index: 10;
+            z-index: 80;
+        }
+
+        #new-average.max-mode {
+            text-shadow: 0 0 20px rgba(110, 87, 72, 0.2);
+            mix-blend-mode: color-burn;
+        }
+
+        /* Color classes for max mode */
+        .max-blue { color: var(--blue-hover) !important; }
+        .max-brown { color: var(--brown-hover) !important; }
+        .max-green { color: var(--green-hover) !important; }
+        .max-grey { color: var(--grey-hover) !important; }
+        .max-orange { color: var(--orange-hover) !important; }
+        .max-pink { color: var(--pink-hover) !important; }
+        .max-purple { color: var(--purple-hover) !important; }
+        .max-red { color: var(--red-hover) !important; }
+        .max-turquoise { color: var(--turquoise-hover) !important; }
+        .max-yellow { color: var(--yellow-hover) !important; }
+        .max-default { color: var(--default-hover) !important; }
+
+        @keyframes fontWeight {
+            0% {
+                font-variation-settings: 'wght' 100;
+            }
+            100% {
+                font-variation-settings: 'wght' 300;
+            }
+        }
+
+        /* Overlay with transparency */
+        .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(50, 23, 183); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1s ease-in-out;
+    z-index: 90; 
+}
+
+        .overlay.screensaver {
+            background: rgb(50, 23, 183,);
+        }
+
+        .overlay.screensaver .continue-text {
+            display: none;
+        }
+
+        .overlay .continue-text {
+            display: block;
+        }
+
+        .overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Color System */
+        :root {
+            /* Blue Theme */
+            --blue-bg: #e3f2fd;
+            --blue-hover: rgb(169, 197, 243);
+            --blue-text: #1565c0;
+            
+            /* Brown Theme */
+            --brown-bg: #efebe9;
+            --brown-hover: #d7ccc8;
+            --brown-text: #4e342e;
+            
+            /* Green Theme */
+            --green-bg: #e8f5e9;
+            --green-hover: #c8e6c9;
+            --green-text: #28982d;
+            
+            /* Grey Theme */
+            --grey-bg: #f5f5f5;
+            --grey-hover: #e0e0e0;
+            --grey-text: #424242;
+            
+            /* Orange Theme */
+            --orange-bg: #fff3e0;
+            --orange-hover: #f5c598;
+            --orange-text: #e65100;
+            
+            /* Pink Theme */
+            --pink-bg: #fce4ec;
+            --pink-hover: #f5b3ca;
+            --pink-text: #a5104f;
+            
+            /* Purple Theme */
+            --purple-bg: #f3e5f5;
+            --purple-hover: #e1bee7;
+            --purple-text: #6a1b9a;
+            
+            /* Red Theme */
+            --red-bg: #ffebee;
+            --red-hover: #efb1b7;
+            --red-text: #dd1f1f;
+            
+            /* Turquoise Theme */
+            --turquoise-bg: #e0f2f1;
+            --turquoise-hover: #afded4;
+            --turquoise-text: #057566;
+            
+            /* Yellow Theme */
+            --yellow-bg: #fff8e1;
+            --yellow-hover: #fff59d;
+            --yellow-text: #f9a71a;
+            
+            /* Default Theme */
+            --default-bg: #f5f5f5;
+            --default-hover: #e0e0e0;
+            --default-text: #424242;
+        }
+
+        /* Color Classes */
+        .color-blue td:hover {
+            background-color: var(--blue-hover);
+            color: var(--blue-text);
+        }
+
+        .color-brown td:hover {
+            background-color: var(--brown-hover);
+            color: var(--brown-text);
+        }
+
+        .color-green td:hover {
+            background-color: var(--green-hover);
+            color: var(--green-text);
+        }
+
+        .color-grey td:hover {
+            background-color: var(--grey-hover);
+            color: var(--grey-text);
+        }
+
+        .color-orange td:hover {
+            background-color: var(--orange-hover);
+            color: var(--orange-text);
+        }
+
+        .color-pink td:hover {
+            background-color: var(--pink-hover);
+            color: var(--pink-text);
+        }
+
+        .color-purple td:hover {
+            background-color: var(--purple-hover);
+            color: var(--purple-text);
+        }
+
+        .color-red td:hover {
+            background-color: var(--red-hover);
+            color: var(--red-text);
+        }
+
+        .color-turquoise td:hover {
+            background-color: var(--turquoise-hover);
+            color: var(--turquoise-text);
+        }
+
+        .color-yellow td:hover {
+            background-color: var(--yellow-hover);
+            color: var(--yellow-text);
+        }
+
+        .color-default td:hover {
+            background-color: var(--default-hover);
+            color: var(--default-text);
         }
 
     </style>
 </head>
 <body>
     <div id="main-content">
-        <h1>Aesthetic Value</h1>
-        <p>This website explores the economic value of aesthetics.
+        <h1 id="Titel">Aesthetic Value</h1>
+        <p id="Titel">This website explores the economic value of aesthetics.
 
         How do we value aesthetics, and why do some aesthetic choices command more money than others? On this website, you can browse through a curated selection, compare different aesthetics, and reflect on why certain choices might hold more value.
 
         You will also be presented with the average value of a filtered aesthetic in Swedish kronor (SEK).
 
-       <br> <strong>Disclaimer:</strong> Please note that this average is derived from my relative small poll of 195 images and is not an accurate representation of all currencies used worldwide.</p>
-
+       <br> <strong>Disclaimer:</strong> Please note that this average is derived from my relative small poll of (nummer) images and is not an accurate representation of all currencies used worldwide.</p>
+       <div class="overlay" onclick="fadeOutOverlay()"><span class="continue-text">click to continue</span></div>
         <div id="output"></div> <!-- Table will be inserted here -->
     </div>
     <div id="menu-bar">
-        <div id="resetButton" class="menu-button">Reset Filter</div>
-        <div id="current-filter" class="menu-button">Current Filter: None</div>
+        <div id="resetButton" class="menu-button">Reset Filter </div>
+        <div id="current-filter" class="menu-button">Current Filter:<br> None</div>
         <div id="average-value" class="menu-button">Average: 0</div>
+        <div id="toggleHighlightMode" class="menu-button">Highlight:<br> Uniform</div>
+        <div id="toggleAverageDisplay" class="menu-button">Big Average:<br>On</div>
     </div>
 
     <div id="content">
@@ -178,7 +432,7 @@ p {
     </div>
 
     <!-- Full-Screen Overlay for Average -->
-    <div id="new-average">Average: 0 SEK</div>
+    <div id="new-average">000</div>
 
     <script>
       let originalData = [];
@@ -186,9 +440,15 @@ let headerRow = [];
 let sortOrder = {};
 let currentFilter = "None";
 let filteredData = [];
+let columnHighlightMode = 'uniform'; // 'uniform' or 'individual'
+let averageDisplayMode = 'on'; // 'on', 'max', or 'off'
+let overlayDismissed = false;
 
 document.addEventListener("DOMContentLoaded", function () {
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSM5ADC_1JGALFMzURqXGjHcrbHNMt4Q3bCAGy5KNOgI4LVG5INTOWyHk2um0JO01_4PXoku3PS8ywA/pub?output=csv";
+
+    // Disable scrolling initially
+    document.body.style.overflow = 'hidden';
 
     Papa.parse(csvUrl, {
         download: true,
@@ -199,6 +459,9 @@ document.addEventListener("DOMContentLoaded", function () {
             renderTable(originalData);
         }
     });
+    
+    // Setup screensaver
+    setupScreensaver();
 });
 
 function renderTable(data) {
@@ -211,6 +474,12 @@ function renderTable(data) {
         th.textContent = cell;
         th.dataset.column = index;
         th.addEventListener("click", () => sortColumn(index));
+        
+        // If this column was the last sorted column, add the appropriate class
+        if (sortOrder.lastColumn === index && sortOrder.lastDirection) {
+            th.classList.add(sortOrder.lastDirection);
+        }
+        
         staticHeaderRow.appendChild(th);
     });
     table.appendChild(staticHeaderRow);
@@ -219,6 +488,11 @@ function renderTable(data) {
     const tbody = document.createElement("tbody");
     data.slice(1).forEach((row) => {
         const tr = document.createElement("tr");
+        
+        // Add color class based on column H (index 7)
+        const colorValue = row[7]?.toLowerCase() || 'default';
+        tr.classList.add(`color-${colorValue}`);
+        
         row.forEach((cell, colIndex) => {
             const td = document.createElement("td");
 
@@ -228,7 +502,15 @@ function renderTable(data) {
                 td.appendChild(img);
                 td.classList.add("A");
             } else {
-                td.textContent = cell;
+                // Format column K (index 10) to 3 decimal places
+                if (colIndex === 10 && !isNaN(cell)) {
+                    const formattedValue = Number(cell).toFixed(3);
+                    td.textContent = formattedValue;
+                    td.dataset.value = formattedValue; // Store the formatted value for sorting
+                    td.style.minWidth = '60px'; // Set a fixed minimum width for column K
+                } else {
+                    td.textContent = cell;
+                }
             }
 
             td.dataset.column = colIndex;
@@ -248,6 +530,12 @@ function renderTable(data) {
     output.appendChild(table);
 
     calculateAverage(filteredData.length > 0 ? filteredData : originalData);
+    
+    // Update the big average color if in max mode
+    if (averageDisplayMode === 'max') {
+        const bigAverageElement = document.getElementById("new-average");
+        applyMaxModeColor(bigAverageElement);
+    }
 }
 
 function isImageUrl(url) {
@@ -255,34 +543,148 @@ function isImageUrl(url) {
 }
 
 function highlightColumn(colIndex) {
-    document.querySelectorAll("table tr").forEach(row => {
-        if (row.children[colIndex]) {
-            row.children[colIndex].classList.add("hovered-column");
-        }
-    });
+    // Get the current row being hovered
+    const currentRow = event.target.parentNode;
+    
+    // Get the color class from the current row
+    const currentRowColorClass = Array.from(currentRow.classList).find(cls => cls.startsWith('color-'));
+    const currentRowColorValue = currentRowColorClass ? currentRowColorClass.replace('color-', '') : 'default';
+    
+    // If in max mode, update the big average color to match the hovered column's color
+    if (averageDisplayMode === 'max') {
+        const bigAverageElement = document.getElementById("new-average");
+        
+        // Remove any existing max color classes
+        removeMaxModeColors(bigAverageElement);
+        
+        // Apply the color class for the hovered column
+        bigAverageElement.classList.add(`max-${currentRowColorValue}`);
+    }
+    
+    if (columnHighlightMode === 'uniform') {
+        // UNIFORM MODE: Apply the same color to the entire column
+        
+        // Get the hover color from CSS variables
+        const hoverColor = getComputedStyle(document.documentElement).getPropertyValue(`--${currentRowColorValue}-hover`).trim();
+        
+        // Get all cells in the column (including header cells)
+        const columnCells = document.querySelectorAll(`table tr th:nth-child(${colIndex + 1}), table tr td:nth-child(${colIndex + 1})`);
+        
+        // Apply the color directly to all cells
+        columnCells.forEach(cell => {
+            // Save the original background color
+            if (!cell.dataset.originalBg) {
+                cell.dataset.originalBg = getComputedStyle(cell).backgroundColor;
+            }
+            // Apply the hover color directly
+            cell.style.backgroundColor = hoverColor;
+        });
+    } else {
+        // INDIVIDUAL MODE: Apply each row's color to its own cell
+        
+        // Get all rows in the table
+        const rows = document.querySelectorAll('table tr');
+        
+        rows.forEach(row => {
+            if (row.children[colIndex]) {
+                const cell = row.children[colIndex];
+                
+                // Get the color class from the row
+                const rowColorClass = Array.from(row.classList).find(cls => cls.startsWith('color-'));
+                if (rowColorClass) {
+                    // Save original background if not already saved
+                    if (!cell.dataset.originalBg) {
+                        cell.dataset.originalBg = getComputedStyle(cell).backgroundColor;
+                    }
+                    
+                    // Get the hover color for this row's color
+                    const colorValue = rowColorClass.replace('color-', '');
+                    const hoverColor = getComputedStyle(document.documentElement).getPropertyValue(`--${colorValue}-hover`).trim();
+                    
+                    // Apply the hover color directly
+                    cell.style.backgroundColor = hoverColor;
+                }
+            }
+        });
+    }
 }
 
 function removeHighlightColumn(colIndex) {
-    document.querySelectorAll("table tr").forEach(row => {
-        if (row.children[colIndex]) {
-            row.children[colIndex].classList.remove("hovered-column");
-        }
-    });
+    // If in max mode, restore the original color of the big average
+    if (averageDisplayMode === 'max') {
+        const bigAverageElement = document.getElementById("new-average");
+        applyMaxModeColor(bigAverageElement);
+    }
+
+    if (columnHighlightMode === 'uniform') {
+        // UNIFORM MODE: Restore original background colors
+        
+        // Get all cells in the column (including header cells)
+        const columnCells = document.querySelectorAll(`table tr th:nth-child(${colIndex + 1}), table tr td:nth-child(${colIndex + 1})`);
+        
+        // Restore original styles
+        columnCells.forEach(cell => {
+            // Restore original background if available, otherwise remove inline style
+            if (cell.dataset.originalBg) {
+                cell.style.backgroundColor = cell.dataset.originalBg;
+            } else {
+                cell.style.removeProperty('background-color');
+            }
+        });
+    } else {
+        // INDIVIDUAL MODE: Restore original background colors
+        
+        // Get all rows in the table
+        const rows = document.querySelectorAll('table tr');
+        
+        rows.forEach(row => {
+            if (row.children[colIndex]) {
+                const cell = row.children[colIndex];
+                // Restore original background if available, otherwise remove inline style
+                if (cell.dataset.originalBg) {
+                    cell.style.backgroundColor = cell.dataset.originalBg;
+                } else {
+                    cell.style.removeProperty('background-color');
+                }
+            }
+        });
+    }
 }
 
 function sortColumn(columnIndex) {
     let dataToSort = filteredData.length > 0 ? filteredData.slice(1) : originalData.slice(1);
     let isAscending = sortOrder[columnIndex] !== "asc";
 
-    dataToSort.sort((a, b) => {
-        let valA = isNaN(a[columnIndex]) ? a[columnIndex] : parseFloat(a[columnIndex]);
-        let valB = isNaN(b[columnIndex]) ? b[columnIndex] : parseFloat(b[columnIndex]);
+    // Remove sort classes from all headers
+    document.querySelectorAll('th').forEach(th => {
+        th.classList.remove('asc', 'desc');
+    });
 
+    dataToSort.sort((a, b) => {
+        let valA, valB;
+        if (columnIndex === 10) { // Special handling for column K
+            valA = parseFloat(a[columnIndex]);
+            valB = parseFloat(b[columnIndex]);
+        } else {
+            valA = isNaN(a[columnIndex]) ? a[columnIndex] : parseFloat(a[columnIndex]);
+            valB = isNaN(b[columnIndex]) ? b[columnIndex] : parseFloat(b[columnIndex]);
+        }
         return isAscending ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
     });
 
     sortOrder[columnIndex] = isAscending ? "asc" : "desc";
+    
+    // Store the last sorted column and direction
+    sortOrder.lastColumn = columnIndex;
+    sortOrder.lastDirection = sortOrder[columnIndex];
+    
     renderTable([headerRow, ...dataToSort]);
+    
+    // After rendering, apply the sort class to maintain the arrow
+    const currentHeader = document.querySelector(`th[data-column="${columnIndex}"]`);
+    if (currentHeader) {
+        currentHeader.classList.add(sortOrder.lastDirection);
+    }
 }
 
 function filterTable(event) {
@@ -292,7 +694,7 @@ function filterTable(event) {
     if (!columnIndex || !filterValue.trim()) return; // Avoid empty filters
 
     currentFilter = filterValue;
-    document.getElementById("current-filter").textContent = "Current Filter: " + filterValue;
+    document.getElementById("current-filter").innerHTML = `Current Filter:<br>${filterValue}`;
 
     filteredData = originalData.filter(row => row[columnIndex] === filterValue);
     renderTable(filteredData);
@@ -312,25 +714,275 @@ function calculateAverage(data) {
     });
 
     let average = count > 0 ? Math.ceil(total / count) : 0;
+    
+    // Always update the small average in the menu
     document.getElementById("average-value").textContent = `Average: ${average} SEK`;
-    document.getElementById("new-average").textContent = `Average: ${average} SEK`;
-    showNewAverage();
+    
+    // Only update the big average with animation if the overlay has been dismissed
+    if (overlayDismissed) {
+        updateBigAverage(average);
+    }
+}
+
+function updateBigAverage(newAverage) {
+    const bigAverageElement = document.getElementById("new-average");
+    
+    // Show the big average if enabled
+    if (averageDisplayMode !== 'off') {
+        bigAverageElement.style.display = "flex";
+        
+        // Apply or remove max-mode class based on the current mode
+        if (averageDisplayMode === 'max') {
+            bigAverageElement.classList.add('max-mode');
+            
+            // Determine which color to use based on current filter or dominant color
+            applyMaxModeColor(bigAverageElement);
+        } else {
+            bigAverageElement.classList.remove('max-mode');
+            // Remove any max color classes
+            removeMaxModeColors(bigAverageElement);
+        }
+    } else {
+        bigAverageElement.style.display = "none";
+    }
+    
+    // Get the current value (without " SEK")
+    const currentText = bigAverageElement.textContent;
+    const currentValue = parseInt(currentText) || 0;
+    
+    // Animate from current to new value
+    animateValue(bigAverageElement, currentValue, newAverage, 1000);
+}
+
+// Function to determine and apply the appropriate color class for max mode
+function applyMaxModeColor(element) {
+    // Remove any existing max color classes
+    removeMaxModeColors(element);
+    
+    // If we have a current filter, use that color
+    if (currentFilter !== "None") {
+        // Try to find the color from the filtered data
+        const data = filteredData.length > 0 ? filteredData : originalData;
+        if (data.length > 1) {
+            const colorValue = data[1][7]?.toLowerCase() || 'default';
+            element.classList.add(`max-${colorValue}`);
+            return;
+        }
+    }
+    
+    // If no filter or couldn't determine color from filter, count colors in visible data
+    const data = filteredData.length > 0 ? filteredData : originalData;
+    const colorCounts = {};
+    
+    // Skip header row
+    data.slice(1).forEach(row => {
+        const colorValue = row[7]?.toLowerCase() || 'default';
+        colorCounts[colorValue] = (colorCounts[colorValue] || 0) + 1;
+    });
+    
+    // Find the most frequent color
+    let dominantColor = 'default';
+    let maxCount = 0;
+    
+    for (const color in colorCounts) {
+        if (colorCounts[color] > maxCount) {
+            maxCount = colorCounts[color];
+            dominantColor = color;
+        }
+    }
+    
+    // Apply the dominant color
+    element.classList.add(`max-${dominantColor}`);
+}
+
+// Function to remove all max color classes
+function removeMaxModeColors(element) {
+    const colorClasses = [
+        'max-blue', 'max-brown', 'max-green', 'max-grey', 'max-orange',
+        'max-pink', 'max-purple', 'max-red', 'max-turquoise', 'max-yellow',
+        'max-default'
+    ];
+    
+    colorClasses.forEach(className => {
+        element.classList.remove(className);
+    });
+}
+
+function animateValue(element, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        
+        // Format with leading zeros to always show 3 digits
+        const formattedValue = value.toString().padStart(3, '0');
+        element.textContent = `${formattedValue} SEK`;
+        
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
 }
 
 document.getElementById("resetButton").addEventListener("click", function () {
     filteredData = [];
     renderTable(originalData);
-    document.getElementById("current-filter").textContent = "Current Filter: None";
+    document.getElementById("current-filter").innerHTML = "Current Filter:<br>None";
 });
 
-// Show the full-screen average overlay
+document.addEventListener("DOMContentLoaded", function () {
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSM5ADC_1JGALFMzURqXGjHcrbHNMt4Q3bCAGy5KNOgI4LVG5INTOWyHk2um0JO01_4PXoku3PS8ywA/pub?output=csv";
+
+    Papa.parse(csvUrl, {
+        download: true,
+        header: false,
+        complete: function (results) {
+            originalData = results.data;
+            headerRow = originalData[0];
+            renderTable(originalData);
+
+            // Update the number "(nummer)" dynamically based on the number of rows in the data
+            const rowCount = originalData.length - 1; // Excluding the header row
+            document.querySelector('p').innerHTML = document.querySelector('p').innerHTML.replace(/(nummer)/, rowCount);
+        }
+    });
+});
+
 function showNewAverage() {
-    document.getElementById("new-average").style.display = "flex"; // Make overlay visible
+    // Only show if the toggle is on
+    if (averageDisplayMode !== 'off') {
+        document.getElementById("new-average").style.display = "flex"; // Make overlay visible
+    }
 }
 
-// Hide the overlay when clicked (optional)
-document.getElementById("new-average").addEventListener("click", function () {
-    this.style.display = "none";
+// Variables for the screensaver functionality
+let inactivityTimer;
+let initialOverlayDismissed = false;
+
+function setupScreensaver() {
+    // Reset the timer on any user interaction
+    const resetTimer = () => {
+        clearTimeout(inactivityTimer);
+        
+        // Only start the screensaver timer if the initial overlay has been dismissed
+        if (initialOverlayDismissed) {
+            inactivityTimer = setTimeout(showScreensaver, 25000); // 60000=1 minute
+        }
+    };
+    
+    // Add event listeners for user activity
+    document.addEventListener('mousemove', resetTimer);
+    document.addEventListener('mousedown', resetTimer);
+    document.addEventListener('keypress', resetTimer);
+    document.addEventListener('touchmove', resetTimer);
+    document.addEventListener('scroll', resetTimer);
+    
+    // Mouse movement specifically for dismissing screensaver
+    document.addEventListener('mousemove', dismissScreensaver);
+    
+    // Initial reset
+    resetTimer();
+}
+
+function showScreensaver() {
+    const overlay = document.querySelector(".overlay");
+    
+    // Only show screensaver if it's not already visible
+    if (overlay.classList.contains('fade-out')) {
+        // Scroll to the top of the page
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+        
+        // Add the screensaver class to hide the "click to continue" text
+        overlay.classList.add('screensaver');
+        // Remove the fade-out class to show the overlay
+        overlay.classList.remove('fade-out');
+    }
+}
+
+function dismissScreensaver() {
+    const overlay = document.querySelector(".overlay");
+    
+    // Only dismiss if it's the screensaver (not the initial overlay)
+    if (overlay.classList.contains('screensaver') && !overlay.classList.contains('fade-out')) {
+        fadeOutOverlay(true);
+    }
+}
+
+function fadeOutOverlay(isScreensaver = false) {
+    const overlay = document.querySelector(".overlay");
+    overlay.classList.add("fade-out");
+    
+    // Wait for the fade-out animation to complete (1s in this case)
+    setTimeout(() => {
+        // Only enable scrolling if this is the initial overlay being dismissed
+        if (!isScreensaver) {
+            document.body.style.overflow = 'auto';
+        }
+        
+        // If this is the initial overlay being dismissed
+        if (!isScreensaver && !initialOverlayDismissed) {
+            initialOverlayDismissed = true;
+            overlayDismissed = true;
+            
+            // Start the inactivity timer
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(showScreensaver, 60000); // 1 minute
+            
+            // Calculate and display the average after overlay fades
+            const data = filteredData.length > 0 ? filteredData : originalData;
+            calculateAverage(data);
+        }
+        
+        // If this was a screensaver, remove the screensaver class
+        if (isScreensaver) {
+            overlay.classList.remove('screensaver');
+        }
+    }, 1000); // Match the transition time of the fade-out animation
+}
+
+document.getElementById("toggleHighlightMode").addEventListener("click", function() {
+    // Get the currently hovered column (if any)
+    const hoveredCell = document.querySelector('td:hover, th:hover');
+    const columnIndex = hoveredCell ? parseInt(hoveredCell.dataset.column) : null;
+    
+    // Toggle between modes
+    columnHighlightMode = columnHighlightMode === 'uniform' ? 'individual' : 'uniform';
+    
+    // Update button text using innerHTML to preserve the <br> tag
+    this.innerHTML = `Highlight:<br>${columnHighlightMode === 'uniform' ? 'Uniform' : 'Individual'}`;
+    
+    // If we're switching to individual mode and there's a hovered column,
+    // reapply the highlight to show individual colors
+    if (columnHighlightMode === 'individual' && columnIndex !== null) {
+        // First remove any existing highlight
+        removeHighlightColumn(columnIndex);
+        // Then apply the new highlight
+        highlightColumn(columnIndex);
+    }
+});
+
+document.getElementById("toggleAverageDisplay").addEventListener("click", function() {
+    // Cycle through the three states: on -> max -> off -> on
+    if (averageDisplayMode === 'on') {
+        averageDisplayMode = 'max';
+        this.innerHTML = `Big Average:<br>Max`;
+    } else if (averageDisplayMode === 'max') {
+        averageDisplayMode = 'off';
+        this.innerHTML = `Big Average:<br>Off`;
+    } else {
+        averageDisplayMode = 'on';
+        this.innerHTML = `Big Average:<br>On`;
+    }
+    
+    // Update the big average display
+    const data = filteredData.length > 0 ? filteredData : originalData;
+    const currentAverage = document.getElementById("average-value").textContent.split(": ")[1].split(" ")[0];
+    updateBigAverage(parseInt(currentAverage));
 });
 
     </script>
